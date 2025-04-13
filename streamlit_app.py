@@ -138,7 +138,7 @@ def load_models():
 
 # --------------------------- PAGE CONFIG --------------------------- #
 st.set_page_config(layout="wide")
-st.title("🎨 Vietnam History Image Colorization - by @tanh2k2k")
+st.title("Vietnam History Image Colorization")
 
 # ----------------------- CUSTOM IMAGE DISPLAY ---------------------- #
 def show_image_centered(img_array, caption="Image"):
@@ -157,7 +157,7 @@ def show_image_centered(img_array, caption="Image"):
     )
 
 # --------------------------- FILE UPLOAD --------------------------- #
-uploaded_file = st.file_uploader("📤 Upload a grayscale image", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("Upload a grayscale image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     original_filename = uploaded_file.name
@@ -168,19 +168,18 @@ if uploaded_file is not None:
 
     # Read and convert image
     original_img = cv2.imread(original_filename)
-    original_rgb = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
 
-    st.markdown("### ✅ Uploaded Image")
+    st.markdown("### Uploaded Image")
     show_image_centered(original_img, "Grayscale Image")
 
     # ---------------------- MODEL INFERENCE ------------------------ #
-    with st.spinner("🎨 Colorizing image... please wait..."):
+    with st.spinner("Colorizing image... please wait..."):
         mse_model, vgg_model = load_models()
         result_mse = colorize_image(mse_model, original_filename)
         result_vgg = colorize_image(vgg_model, original_filename)
 
     # --------------------- DISPLAY RESULTS ------------------------ #
-    st.markdown("### 🎨 Colorized Results")
+    st.markdown("### Colorized Results")
     col1, col2 = st.columns(2)
 
     with col1:
