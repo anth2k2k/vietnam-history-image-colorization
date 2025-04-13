@@ -100,7 +100,7 @@ def load_models():
 # , resnet_model
 
 # Streamlit
-st.title("Vietnam History Image Colorization - by @tanh2k2k")
+st.title("Vietnam History Image Colorization")
 
 uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
 
@@ -124,7 +124,7 @@ if uploaded_file is not None:
     # Hiển thị ảnh kết quả
     st.subheader("Colorized Results")
 
-    col1, col2, col3 = st.columns(2)
+    col1, col2 = st.columns(2)
 # , col3
     col1.image(result_mse, caption="MSE Model", use_container_width=True)
     col2.image(result_vgg, caption="Perceptual VGG Model", use_container_width=True)
