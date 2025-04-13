@@ -126,7 +126,7 @@ if uploaded_file is not None:
     col1, col2, col3 = st.columns(3)
     col1.image(result_mse, caption="MSE Model", use_container_width=True)
     col2.image(result_vgg, caption="Perceptual VGG Model", use_container_width=True)
-    col3.image(result_resnet, caption="Perceptual ResNet Model", use_column_width=True)
+    col3.image(result_resnet, caption="Perceptual ResNet Model", use_container_width=True)
 
     # Nút tải về
     st.download_button(f"Download - MSE", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
