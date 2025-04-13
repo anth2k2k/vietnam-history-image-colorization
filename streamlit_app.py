@@ -101,6 +101,7 @@ def load_models():
 
 # Streamlit UI
 st.title("Vietnam History Image Colorization - by @tanh2k2k")
+st.set_page_config(layout="wide")
 
 uploaded_file = st.file_uploader("Upload a grayscale image", type=["jpg", "jpeg", "png"])
 
