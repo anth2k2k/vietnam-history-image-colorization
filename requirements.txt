@@ -1,5 +1,6 @@
 streamlit
 tensorflow
+tf_keras
 opencv-python-headless
 matplotlib
 scikit-learn
