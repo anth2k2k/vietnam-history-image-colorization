@@ -122,25 +122,25 @@ if uploaded_file is not None:
 
     # Load models và xử lý
     with st.spinner("Colorizing..."):
-        mse_model, vgg_model, resnet_model = load_models()
+        mse_model, vgg_model = load_models()
 
         result_mse = colorize_image(mse_model, original_filename)
         result_vgg = colorize_image(vgg_model, original_filename)
-        result_resnet = colorize_image(resnet_model, original_filename)
+        # result_resnet = colorize_image(resnet_model, original_filename)
 
     with right_col:
         st.subheader("Colorized Results")
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         col1.image(result_mse, caption="Mô hình MSE", use_column_width=True)
         col2.image(result_vgg, caption="Perceptual VGG", use_column_width=True)
-        col3.image(result_resnet, caption="Perceptual ResNet", use_column_width=True)
+        # col3.image(result_resnet, caption="Perceptual ResNet", use_column_width=True)
 
         st.markdown("### Download Image")
-        col_d1, col_d2, col_d3 = st.columns(3)
+        col_d1, col_d2 = st.columns(2)
         col_d1.download_button("Download MSE", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
         col_d2.download_button("Download VGG", data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_vgg.jpg", mime="image/jpeg")
-        col_d3.download_button("Download ResNet", data=cv2.imencode('.jpg', cv2.COLOR_RGB2BGR(result_resnet))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
+        # col_d3.download_button("Download ResNet", data=cv2.imencode('.jpg', cv2.COLOR_RGB2BGR(result_resnet))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
 
 else:
     with right_col:
