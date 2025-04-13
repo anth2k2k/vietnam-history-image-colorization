@@ -113,7 +113,7 @@ if uploaded_file is not None:
 
     # Load models
     with st.spinner("Colorizing..."):
-        mse_model, vgg_model = load_models()
+        mse_model, vgg_model, resnet_model = load_models()
 
         # Chạy colorization với 3 model
         result_mse = colorize_image(mse_model, original_filename)
