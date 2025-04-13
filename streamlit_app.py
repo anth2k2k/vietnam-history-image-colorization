@@ -8,6 +8,7 @@ import cv2
 from tensorflow import keras
 from keras.applications import VGG16, ResNet50
 from keras.models import Model
+import base64
 
 vgg_model = None
 resnet_model = None
@@ -100,36 +101,102 @@ def load_models():
             # , resnet_model
 
 # Streamlit
-st.title("Vietnam History Image Colorization - by @tanh2k2k")
+# st.set_page_config(layout="wide")
+# st.title("Vietnam History Image Colorization - by @tanh2k2k")
+#
+# uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
+#
+# if uploaded_file is not None:
+#     original_filename = uploaded_file.name
+#
+#     with open(original_filename, "wb") as f:
+#         f.write(uploaded_file.read())
+#
+#     st.image(original_filename, caption="Upload sucessfully", use_container_width=True)
+#
+#     # Load models
+#     with st.spinner("Colorizing..."):
+#         mse_model, vgg_model = load_models()
+#
+#         # Chạy colorization với 3 model
+#         result_mse = colorize_image(mse_model, original_filename)
+#         result_vgg = colorize_image(vgg_model, original_filename)
+#         # result_resnet = colorize_image(resnet_model, original_filename)
+#
+#     # Hiển thị ảnh kết quả
+#     st.subheader("Colorized Results")
+#
+#     col1, col2= st.columns(2)
+#     col1.image(result_mse, caption="MSE Model", use_container_width=True)
+#     col2.image(result_vgg, caption="Perceptual VGG Model", use_container_width=True)
+#     # col3.image(result_resnet, caption="Perceptual ResNet Model", use_column_width=True)
+#
+#     # Nút tải về
+#     st.download_button(f"Download - MSE", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
+#     st.download_button(f"Download - VGG", data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_vgg.jpg", mime="image/jpeg")
+#     # st.download_button(f"Download - ResNet", data=cv2.imencode('.jpg', cv2.cvtColor(result_resnet, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
 
-uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
+# --------------------------- PAGE CONFIG --------------------------- #
+st.set_page_config(layout="wide")
+st.title("🎨 Vietnam History Image Colorization - by @tanh2k2k")
+
+# ----------------------- CUSTOM IMAGE DISPLAY ---------------------- #
+def show_image_centered_cv2(img_array, caption="Image"):
+    _, buffer = cv2.imencode('.jpg', img_array)
+    img_base64 = base64.b64encode(buffer).decode()
+
+    st.markdown(
+        f"""
+        <div style='text-align:center; margin-bottom: 1rem;'>
+            <img src='data:image/jpeg;base64,{img_base64}' 
+                 style='max-width: 400px; width: auto; height: auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);' />
+            <p style='font-size: 16px; margin-top: 0.5rem;'>{caption}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# --------------------------- FILE UPLOAD --------------------------- #
+uploaded_file = st.file_uploader("📤 Upload a grayscale image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     original_filename = uploaded_file.name
 
+    # Save uploaded image
     with open(original_filename, "wb") as f:
         f.write(uploaded_file.read())
 
-    st.image(original_filename, caption="Upload sucessfully", use_container_width=True)
+    # Read and convert image
+    original_img = cv2.imread(original_filename)
+    original_rgb = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
 
-    # Load models
-    with st.spinner("Colorizing..."):
+    st.markdown("### ✅ Uploaded Image")
+    show_image_centered_cv2(original_rgb, "Grayscale Image")
+
+    # ---------------------- MODEL INFERENCE ------------------------ #
+    with st.spinner("🎨 Colorizing image... please wait..."):
         mse_model, vgg_model = load_models()
-
-        # Chạy colorization với 3 model
         result_mse = colorize_image(mse_model, original_filename)
         result_vgg = colorize_image(vgg_model, original_filename)
-        # result_resnet = colorize_image(resnet_model, original_filename)
 
-    # Hiển thị ảnh kết quả
-    st.subheader("Colorized Results")
+    # --------------------- DISPLAY RESULTS ------------------------ #
+    st.markdown("### 🎨 Colorized Results")
+    col1, col2 = st.columns(2)
 
-    col1, col2= st.columns(2)
-    col1.image(result_mse, caption="MSE Model", use_container_width=True)
-    col2.image(result_vgg, caption="Perceptual VGG Model", use_container_width=True)
-    # col3.image(result_resnet, caption="Perceptual ResNet Model", use_column_width=True)
+    with col1:
+        show_image_centered_cv2(result_mse, "MSE Model")
+        st.download_button(
+            "⬇️ Download MSE Result",
+            data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(),
+            file_name=f"{original_filename.split('.')[0]}_mse.jpg",
+            mime="image/jpeg"
+        )
 
-    # Nút tải về
-    st.download_button(f"Download - MSE", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
-    st.download_button(f"Download - VGG", data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_vgg.jpg", mime="image/jpeg")
-    # st.download_button(f"Download - ResNet", data=cv2.imencode('.jpg', cv2.cvtColor(result_resnet, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
+    with col2:
+        show_image_centered_cv2(result_vgg, "Perceptual VGG Model")
+        st.download_button(
+            "⬇️ Download VGG Result",
+            data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(),
+            file_name=f"{original_filename.split('.')[0]}_vgg.jpg",
+            mime="image/jpeg"
+        )
