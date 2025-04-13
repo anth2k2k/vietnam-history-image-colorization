@@ -8,7 +8,6 @@ import cv2
 from tensorflow import keras
 from keras.applications import VGG16, ResNet50
 from keras.models import Model
-import base64
 
 vgg_model = None
 resnet_model = None
@@ -95,10 +94,9 @@ def load_models():
     mse_model = tf.keras.models.load_model("models/colorization_model_mse", custom_objects={"mse_loss": mse_loss})
     vgg_model = tf.keras.models.load_model("models/colorization_model_perceptual",
                                            custom_objects={"perceptual_loss": perceptual_loss_vgg})
-    # resnet_model = tf.keras.models.load_model("models/colorization_model_perceptual_resnet",
-    #                                           custom_objects={"perceptual_loss": perceptual_loss_resnet})
-    return mse_model, vgg_model
-            # , resnet_model
+    resnet_model = tf.keras.models.load_model("models/colorization_model_perceptual_resnet",
+                                              custom_objects={"perceptual_loss": perceptual_loss_resnet})
+    return mse_model, vgg_model, resnet_model
 
 # Streamlit
 st.title("Vietnam History Image Colorization - by @tanh2k2k")
@@ -120,17 +118,17 @@ if uploaded_file is not None:
         # Chạy colorization với 3 model
         result_mse = colorize_image(mse_model, original_filename)
         result_vgg = colorize_image(vgg_model, original_filename)
-        # result_resnet = colorize_image(resnet_model, original_filename)
+        result_resnet = colorize_image(resnet_model, original_filename)
 
     # Hiển thị ảnh kết quả
     st.subheader("Colorized Results")
 
-    col1, col2= st.columns(2)
+    col1, col2, col3 = st.columns(3)
     col1.image(result_mse, caption="MSE Model", use_container_width=True)
     col2.image(result_vgg, caption="Perceptual VGG Model", use_container_width=True)
-    # col3.image(result_resnet, caption="Perceptual ResNet Model", use_column_width=True)
+    col3.image(result_resnet, caption="Perceptual ResNet Model", use_column_width=True)
 
     # Nút tải về
     st.download_button(f"Download - MSE", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
     st.download_button(f"Download - VGG", data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_vgg.jpg", mime="image/jpeg")
-    # st.download_button(f"Download - ResNet", data=cv2.imencode('.jpg', cv2.cvtColor(result_resnet, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
+    st.download_button(f"Download - ResNet", data=cv2.imencode('.jpg', cv2.cvtColor(result_resnet, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
