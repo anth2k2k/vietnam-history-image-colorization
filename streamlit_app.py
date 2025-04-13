@@ -141,7 +141,7 @@ st.set_page_config(layout="wide")
 st.title("🎨 Vietnam History Image Colorization - by @tanh2k2k")
 
 # ----------------------- CUSTOM IMAGE DISPLAY ---------------------- #
-def show_image_centered_cv2(img_array, caption="Image"):
+def show_image_centered(img_array, caption="Image"):
     _, buffer = cv2.imencode('.jpg', img_array)
     img_base64 = base64.b64encode(buffer).decode()
 
@@ -149,7 +149,7 @@ def show_image_centered_cv2(img_array, caption="Image"):
         f"""
         <div style='text-align:center; margin-bottom: 1rem;'>
             <img src='data:image/jpeg;base64,{img_base64}' 
-                 style='max-width: 400px; width: auto; height: auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);' />
+                 style='max-width: 500px; width: auto; height: auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);' />
             <p style='font-size: 16px; margin-top: 0.5rem;'>{caption}</p>
         </div>
         """,
@@ -171,7 +171,7 @@ if uploaded_file is not None:
     original_rgb = cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
 
     st.markdown("### ✅ Uploaded Image")
-    show_image_centered_cv2(original_rgb, "Grayscale Image")
+    show_image_centered(original_img, "Grayscale Image")
 
     # ---------------------- MODEL INFERENCE ------------------------ #
     with st.spinner("🎨 Colorizing image... please wait..."):
@@ -184,7 +184,7 @@ if uploaded_file is not None:
     col1, col2 = st.columns(2)
 
     with col1:
-        show_image_centered_cv2(result_mse, "MSE Model")
+        show_image_centered(result_mse, "MSE Model")
         st.download_button(
             "⬇️ Download MSE Result",
             data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(),
@@ -193,7 +193,7 @@ if uploaded_file is not None:
         )
 
     with col2:
-        show_image_centered_cv2(result_vgg, "Perceptual VGG Model")
+        show_image_centered(result_vgg, "Perceptual VGG Model")
         st.download_button(
             "⬇️ Download VGG Result",
             data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(),
