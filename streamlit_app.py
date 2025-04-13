@@ -124,7 +124,7 @@ if uploaded_file is not None:
     # Hiển thị ảnh kết quả
     st.subheader("Colorized Results")
 
-    col1, col2, col3 = st.columns(2) # fix 3 later if complete ResNet model
+    col1, col2= st.columns(2) # fix 3 later if complete ResNet model
     col1.image(result_mse, caption="MSE Model", width=600)
     col2.image(result_vgg, caption="Perceptual VGG Model", width=600)
     # col3.image(result_resnet, caption="Perceptual ResNet Model", use_column_width=True)
