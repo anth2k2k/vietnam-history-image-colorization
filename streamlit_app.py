@@ -110,7 +110,7 @@ if uploaded_file is not None:
     with open(original_filename, "wb") as f:
         f.write(uploaded_file.read())
 
-    st.image(original_filename, caption="Upload sucessfully", width=600)
+    st.image(original_filename, caption="Upload sucessfully", use_container_width=True)
 
     # Load models
     with st.spinner("Colorizing..."):
@@ -124,9 +124,9 @@ if uploaded_file is not None:
     # Hiển thị ảnh kết quả
     st.subheader("Colorized Results")
 
-    col1, col2= st.columns(2) # fix 3 later if complete ResNet model
-    col1.image(result_mse, caption="MSE Model", width=600)
-    col2.image(result_vgg, caption="Perceptual VGG Model", width=600)
+    col1, col2= st.columns(2)
+    col1.image(result_mse, caption="MSE Model", use_container_width=True)
+    col2.image(result_vgg, caption="Perceptual VGG Model", use_container_width=True)
     # col3.image(result_resnet, caption="Perceptual ResNet Model", use_column_width=True)
 
     # Nút tải về
