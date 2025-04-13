@@ -103,45 +103,34 @@ def load_models():
 st.set_page_config(layout="wide")
 st.title("Vietnam History Image Colorization - by @tanh2k2k")
 
-left_col, right_col = st.columns([1, 2])
-
-with left_col:
-    uploaded_file = st.file_uploader("📤 Upload một ảnh xám", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Lấy tên ảnh gốc
     original_filename = uploaded_file.name
 
-    # Lưu file tạm
     with open(original_filename, "wb") as f:
         f.write(uploaded_file.read())
 
-    # Hiển thị ảnh gốc
-    with left_col:
-        st.image(original_filename, caption="Upload sucessfully!", use_column_width=True)
+    st.image(original_filename, caption="Upload sucessfully", width=600)
 
-    # Load models và xử lý
+    # Load models
     with st.spinner("Colorizing..."):
         mse_model, vgg_model = load_models()
 
+        # Chạy colorization với 3 model
         result_mse = colorize_image(mse_model, original_filename)
         result_vgg = colorize_image(vgg_model, original_filename)
         # result_resnet = colorize_image(resnet_model, original_filename)
 
-    with right_col:
-        st.subheader("Colorized Results")
+    # Hiển thị ảnh kết quả
+    st.subheader("Colorized Results")
 
-        col1, col2 = st.columns(2)
-        col1.image(result_mse, caption="Mô hình MSE", use_column_width=True)
-        col2.image(result_vgg, caption="Perceptual VGG", use_column_width=True)
-        # col3.image(result_resnet, caption="Perceptual ResNet", use_column_width=True)
+    col1, col2, col3 = st.columns(2) # fix 3 later if complete ResNet model
+    col1.image(result_mse, caption="MSE Model", width=600)
+    col2.image(result_vgg, caption="Perceptual VGG Model", width=600)
+    # col3.image(result_resnet, caption="Perceptual ResNet Model", use_column_width=True)
 
-        st.markdown("### Download Image")
-        col_d1, col_d2 = st.columns(2)
-        col_d1.download_button("Download MSE", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
-        col_d2.download_button("Download VGG", data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_vgg.jpg", mime="image/jpeg")
-        # col_d3.download_button("Download ResNet", data=cv2.imencode('.jpg', cv2.COLOR_RGB2BGR(result_resnet))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
-
-else:
-    with right_col:
-        st.info("Please upload a grayscale image to get started.")
+    # Nút tải về
+    st.download_button(f"Download - MSE", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
+    st.download_button(f"Download - VGG", data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_vgg.jpg", mime="image/jpeg")
+    # st.download_button(f"Download - ResNet", data=cv2.imencode('.jpg', cv2.cvtColor(result_resnet, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
