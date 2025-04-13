@@ -100,7 +100,6 @@ def load_models():
             # , resnet_model
 
 # Streamlit
-st.set_page_config(layout="wide")
 st.title("Vietnam History Image Colorization - by @tanh2k2k")
 
 uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
