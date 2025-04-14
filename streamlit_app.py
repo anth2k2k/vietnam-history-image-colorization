@@ -91,10 +91,10 @@ def colorize_image(model, image_path):
 
 @st.cache_resource
 def load_models():
-    mse_model = tf.keras.models.load_model("models/colorization_model_mse_final", custom_objects={"mse_loss": mse_loss})
-    vgg_model = tf.keras.models.load_model("models/colorization_model_perceptual_final",
+    mse_model = tf.keras.models.load_model("models/colorization_model_mse", custom_objects={"mse_loss": mse_loss})
+    vgg_model = tf.keras.models.load_model("models/colorization_model_perceptual",
                                            custom_objects={"perceptual_loss": perceptual_loss_vgg})
-    resnet_model = tf.keras.models.load_model("models/colorization_model_perceptual_resnet_final",
+    resnet_model = tf.keras.models.load_model("models/colorization_model_perceptual_resnet",
                                               custom_objects={"perceptual_loss": perceptual_loss_resnet})
     return mse_model, vgg_model, resnet_model
 
