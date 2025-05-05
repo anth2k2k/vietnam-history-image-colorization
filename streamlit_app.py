@@ -99,7 +99,7 @@ def load_models():
     return mse_model, vgg_model, resnet_model
 
 # Streamlit
-st.title("Khôi phục ảnh cũ trực tuyến")
+st.title("Tô màu ảnh cũ trực tuyến")
 
 uploaded_file = st.file_uploader("Tải lên hình ảnh", type=["jpg", "jpeg", "png"])
 
