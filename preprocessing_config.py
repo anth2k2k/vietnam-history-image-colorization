@@ -1,0 +1,8 @@
+import os
+
+# DIRECTORY INFORMATION
+ROOT_DIR = os.path.abspath('./')
+
+# DATA INFORMATION
+IMAGE_SIZE = 224
+FRAME_INTERVAL = 60

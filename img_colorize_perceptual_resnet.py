@@ -18,35 +18,34 @@ if gpus:
     try:
         tf.config.set_logical_device_configuration(
             gpus[0],
-            [tf.config.LogicalDeviceConfiguration(memory_limit=23000)]  # Giới hạn 20GB
+            [tf.config.LogicalDeviceConfiguration(memory_limit=23000)]
         )
     except RuntimeError as e:
         print(e)
 
 
-resnet_model = None # Define as global variable
+resnet_model = None
+
 
 def build_resnet_model(layer_names):
-    """Tạo model ResNet50 để trích xuất đặc trưng"""
     global resnet_model
     if resnet_model is None:
         resnet = ResNet50(weights="imagenet", include_top=False)
-        resnet.trainable = False  # Đóng băng model
+        resnet.trainable = False
         outputs = [resnet.get_layer(name).output for name in layer_names]
         resnet_model = Model(inputs=resnet.input, outputs=outputs)
     return resnet_model
 
+
 def perceptual_loss(y_true, y_pred):
-    """Hàm Perceptual Loss dựa trên ResNet50"""
-    resnet_layers = ["conv1_relu", "conv2_block3_out", "conv3_block4_out"]  # Chọn các feature layers
+    resnet_layers = ["conv1_relu", "conv2_block3_out", "conv3_block4_out"]
     resnet_model = build_resnet_model(resnet_layers)
 
-    # Chuyển ảnh từ AB (2 channels) thành LAB (3 channels) bằng cách thêm kênh L
     y_true_lab = tf.concat([tf.zeros_like(y_true[:, :, :, :1]), y_true], axis=-1)
     y_pred_lab = tf.concat([tf.zeros_like(y_pred[:, :, :, :1]), y_pred], axis=-1)
 
-    print("Updated Shape of y_true:", y_true_lab.shape)  # Debugging
-    print("Updated Shape of y_pred:", y_pred_lab.shape)  # Debugging
+    print("Updated Shape of y_true:", y_true_lab.shape)  # Debug
+    print("Updated Shape of y_pred:", y_pred_lab.shape)  # Debug
 
     y_true_features = resnet_model(y_true_lab)
     y_pred_features = resnet_model(y_pred_lab)
@@ -59,7 +58,6 @@ def perceptual_loss(y_true, y_pred):
 def build_unet():
     inputs = keras.Input(shape=(224, 224, 1))
 
-    # Encoder
     conv1 = layers.Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
     pool1 = layers.MaxPooling2D((2, 2), strides=2)(conv1)
 
@@ -74,7 +72,7 @@ def build_unet():
 
     conv5 = layers.Conv2D(512, (3, 3), activation='relu', padding='same')(pool4)
 
-    # Decoder
+
     up4 = layers.Conv2DTranspose(256, (3, 3), strides=2, padding='same', activation='relu')(conv5)
     concat4 = layers.concatenate([up4, conv4])
     conv6 = layers.Conv2D(256, (3, 3), activation='relu', padding='same')(concat4)
@@ -111,8 +109,8 @@ def preprocess_image(image_path):
     img = cv2.resize(img, (224, 224))
     L, A, B = cv2.split(img)
 
-    L = L.astype("float32") / 255.0  # Normalize L
-    A = (A.astype("float32") - 128) / 128.0  # Normalize A, B to [-1,1]
+    L = L.astype("float32") / 255.0
+    A = (A.astype("float32") - 128) / 128.0
     B = (B.astype("float32") - 128) / 128.0
 
     return L.reshape(224, 224, 1), np.stack([A, B], axis=-1)
@@ -141,10 +139,10 @@ val_gen = data_generator(val_paths, batch_size=16)
 checkpoint = keras.callbacks.ModelCheckpoint("colorization_model_perceptual_resnet", save_best_only=True, save_format="tf")
 reduce_lr = keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=3, min_lr=1e-6)
 
-# Đo thời gian bắt đầu
+
 start_time = time.time()
 
-# Train model and save history
+
 history = model.fit(
     train_gen,
     steps_per_epoch=len(train_paths) // 16,
@@ -155,13 +153,11 @@ history = model.fit(
 )
 
 
-# Plot training history
 def plot_training_history(history):
     epochs = range(1, len(history.history['loss']) + 1)
 
     plt.figure(figsize=(12, 5))
 
-    # Biểu đồ Loss
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history.history['loss'], 'r', label='Training Loss')
     plt.plot(epochs, history.history['val_loss'], 'b', label='Validation Loss')
@@ -170,7 +166,6 @@ def plot_training_history(history):
     plt.title('Training & Validation Loss')
     plt.legend()
 
-    # Biểu đồ MAE
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history.history['mae'], 'r', label='Training MAE')
     plt.plot(epochs, history.history['val_mae'], 'b', label='Validation MAE')
@@ -182,14 +177,12 @@ def plot_training_history(history):
     plt.savefig("colorization_model_perceptual_resnet.svg", format='svg')
 
 
-# Hiển thị kết quả training
 plot_training_history(history)
 
 
-# Save final model using TensorFlow format
 model.save("colorization_model_perceptual_resnet_final", save_format="tf")
+
 
 end_time = time.time()
 training_duration = end_time - start_time
-# Ghi thời gian chạy vào file log
 logging.info(f"Total training time: {training_duration:.2f} seconds")

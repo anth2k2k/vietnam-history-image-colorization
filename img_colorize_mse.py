@@ -16,7 +16,7 @@ if gpus:
     try:
         tf.config.set_logical_device_configuration(
             gpus[0],
-            [tf.config.LogicalDeviceConfiguration(memory_limit=23000)]  # Giới hạn 20GB
+            [tf.config.LogicalDeviceConfiguration(memory_limit=23000)]
         )
     except RuntimeError as e:
         print(e)
@@ -29,7 +29,6 @@ def mse_loss(y_true, y_pred):
 def build_unet():
     inputs = keras.Input(shape=(224, 224, 1))
 
-    # Encoder
     conv1 = layers.Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
     pool1 = layers.MaxPooling2D((2, 2), strides=2)(conv1)
 
@@ -44,7 +43,7 @@ def build_unet():
 
     conv5 = layers.Conv2D(512, (3, 3), activation='relu', padding='same')(pool4)
 
-    # Decoder
+
     up4 = layers.Conv2DTranspose(256, (3, 3), strides=2, padding='same', activation='relu')(conv5)
     concat4 = layers.concatenate([up4, conv4])
     conv6 = layers.Conv2D(256, (3, 3), activation='relu', padding='same')(concat4)
@@ -81,8 +80,8 @@ def preprocess_image(image_path):
     img = cv2.resize(img, (224, 224))
     L, A, B = cv2.split(img)
 
-    L = L.astype("float32") / 255.0  # Normalize L
-    A = (A.astype("float32") - 128) / 128.0  # Normalize A, B to [-1,1]
+    L = L.astype("float32") / 255.0
+    A = (A.astype("float32") - 128) / 128.0
     B = (B.astype("float32") - 128) / 128.0
 
     return L.reshape(224, 224, 1), np.stack([A, B], axis=-1)
@@ -111,10 +110,10 @@ val_gen = data_generator(val_paths, batch_size=16)
 checkpoint = keras.callbacks.ModelCheckpoint("colorization_model_mse", save_best_only=True, save_format="tf")
 reduce_lr = keras.callbacks.ReduceLROnPlateau(factor=0.5, patience=3, min_lr=1e-6)
 
-# Đo thời gian bắt đầu
+
 start_time = time.time()
 
-# Train model and save history
+
 history = model.fit(
     train_gen,
     steps_per_epoch=len(train_paths) // 16,
@@ -125,42 +124,36 @@ history = model.fit(
 )
 
 
-# Plot training history
 def plot_training_history(history):
     epochs = range(1, len(history.history['loss']) + 1)
 
     plt.figure(figsize=(12, 5))
 
-    # Biểu đồ Loss
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history.history['loss'], 'r', label='Training Loss')
     plt.plot(epochs, history.history['val_loss'], 'b', label='Validation Loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.title('[MSE] Training & Validation Loss')
+    plt.title('Training & Validation Loss')
     plt.legend()
 
-    # Biểu đồ MAE
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history.history['mae'], 'r', label='Training MAE')
     plt.plot(epochs, history.history['val_mae'], 'b', label='Validation MAE')
     plt.xlabel('Epochs')
     plt.ylabel('MAE')
-    plt.title('[MSE] Training & Validation MAE')
+    plt.title('Training & Validation MAE')
     plt.legend()
 
     plt.savefig("colorization_model_mse.svg", format='svg')
 
 
-# Hiển thị kết quả training
 plot_training_history(history)
 
 
-# Save final model using TensorFlow format
 model.save("colorization_model_mse_final", save_format="tf")
+
 
 end_time = time.time()
 training_duration = end_time - start_time
-# Ghi thời gian chạy vào file log
 logging.info(f"Total training time: {training_duration:.2f} seconds")
-
