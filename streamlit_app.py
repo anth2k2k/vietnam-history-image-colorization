@@ -99,9 +99,9 @@ def load_models():
     return mse_model, vgg_model, resnet_model
 
 # Streamlit
-st.title("Vietnam History Image Colorization")
+st.title("Khôi phục ảnh cũ trực tuyến")
 
-uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("Tải lên hình ảnh", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     original_filename = uploaded_file.name
@@ -109,10 +109,10 @@ if uploaded_file is not None:
     with open(original_filename, "wb") as f:
         f.write(uploaded_file.read())
 
-    st.image(original_filename, caption="Upload sucessfully", use_container_width=True)
+    st.image(original_filename, caption="Tải lên thành công", use_container_width=True)
 
     # Load models
-    with st.spinner("Colorizing..."):
+    with st.spinner("Đang thực hiện phục chế..."):
         mse_model, vgg_model, resnet_model = load_models()
 
         # Chạy colorization với 3 model
@@ -121,14 +121,14 @@ if uploaded_file is not None:
         result_resnet = colorize_image(resnet_model, original_filename)
 
     # Hiển thị ảnh kết quả
-    st.subheader("Colorized Results")
+    st.subheader("Kết quả phục chế")
 
     col1, col2, col3 = st.columns(3)
-    col1.image(result_mse, caption="MSE Model", use_container_width=True)
-    col2.image(result_vgg, caption="Perceptual VGG Model", use_container_width=True)
-    col3.image(result_resnet, caption="Perceptual ResNet Model", use_container_width=True)
+    col1.image(result_mse, caption="Loại 1", use_container_width=True)
+    col2.image(result_vgg, caption="Loại 2", use_container_width=True)
+    col3.image(result_resnet, caption="Loại 3", use_container_width=True)
 
     # Nút tải về
-    st.download_button(f"Download - MSE", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
-    st.download_button(f"Download - VGG", data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_vgg.jpg", mime="image/jpeg")
-    st.download_button(f"Download - ResNet", data=cv2.imencode('.jpg', cv2.cvtColor(result_resnet, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
+    st.download_button(f"Tải về Loại 1", data=cv2.imencode('.jpg', cv2.cvtColor(result_mse, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_mse.jpg", mime="image/jpeg")
+    st.download_button(f"Tải về Loại 2", data=cv2.imencode('.jpg', cv2.cvtColor(result_vgg, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_vgg.jpg", mime="image/jpeg")
+    st.download_button(f"Tải về Loại 3", data=cv2.imencode('.jpg', cv2.cvtColor(result_resnet, cv2.COLOR_RGB2BGR))[1].tobytes(), file_name=f"{original_filename.split('.')[0]}_resnet.jpg", mime="image/jpeg")
